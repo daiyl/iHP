@@ -2,7 +2,7 @@
 
 - **Input**: Intervention Space, $A$.
 - **Output**: State Space, $S$; Observation Space, $O$.
-- **Probability transition model**: $p(s'|s, a)$, where $a \in A$, and $\{s, s'\} \in S$.
+- **Probability transition model**: $p(s'|s, a)$, where $a \in A$, and ${s, s'} \in S$.
 - **Decoder**: $dec(o|s)$, where $o \in O$.
 
 ## Models of patients: ##
