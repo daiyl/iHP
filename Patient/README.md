@@ -1,7 +1,7 @@
 # Patient
 
 - **Input**: Intervention Space, $A$.
-- **Output**: State Space, $S$. Observation Space, $O$.
+- **Output**: State Space, $S$; Observation Space, $O$.
 - **Probability transition model**: $p(s'|s, a)$, where $a \in A$, and $\{s, s'\} \in S$.
 - **Decoder**: $dec(o|s)$, where $o \in O$.
 
@@ -23,5 +23,7 @@
 	
 	$$p_1(s_{t+1}=(0,0,1)|E_{1c}) = 1. $$
 
-2. **Periodic State Transition Model**.
+2. **Periodic State Transition Model**. Assume that the latent health state undergoes a periodic alternation between the unhealthy state $(0,1,0)$ for $T$ consecutive time steps and the healthy state $(0,0,0)$ for $T$ consecutive time steps, yielding a cycle of length $2T$.  The latent health state transitions into a stable healthy state $(0,0,0)$ only if the intervention $a = (0,1,0)$ is applied continuously for $n$ time steps. Otherwise, the latent health state resumes its intrinsic periodic alternation. We define four mutually exclusive events based on the history of interventions up to time $t$:
+
+
 3. 
