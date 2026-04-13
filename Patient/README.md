@@ -18,7 +18,9 @@ Event $E_{1c}$ (No Effective Transition). None of the above events occur ($\lnot
 The state transition probabilities can be represented as:
 
 $$p_1(s_{t+1}=(0,0,0)|E_{1a}) = 1, $$
+
 $$p_1(s_{t+1}=(0,0,0)|E_{1b}) = 1, $$
+
 $$p_1(s_{t+1}=(0,0,1)|E_{1c}) = 1. $$
 
 2. **Periodic State Transition Model**.
