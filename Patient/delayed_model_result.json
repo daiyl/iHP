@@ -1,0 +1,119 @@
+{
+  "states": [
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ]
+  ],
+  "interventions": [
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "events": [
+    "no_effective_transition",
+    "partial_transition",
+    "partial_transition",
+    "no_effective_transition",
+    "no_effective_transition",
+    "no_effective_transition",
+    "partial_transition",
+    "partial_transition",
+    "complete_transition"
+  ],
+  "model_name": "DelayedStateTransitionModel",
+  "model_params": {
+    "n": 2,
+    "m": 4,
+    "k": 2,
+    "type": "delayed_state_transition"
+  }
+}
