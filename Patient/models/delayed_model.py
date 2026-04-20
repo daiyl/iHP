@@ -1,5 +1,5 @@
 from typing import List, Tuple, Optional, Dict, Any
-from base_model import BaseHealthModel, EventType
+from models.base_model import BaseHealthModel, EventType
 
 
 class DelayedStateTransitionModel(BaseHealthModel):

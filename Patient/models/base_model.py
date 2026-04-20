@@ -66,8 +66,8 @@ class BaseHealthModel(ABC):
         
         for t in range(1, len(intervention_sequence) + 1):
             history = intervention_sequence[:t]
-            event = self.check_event(history, state_sequence[:-1])
-            next_state = self.get_next_state(state, history, state_sequence[:-1])
+            event = self.check_event(history, state_sequence[:])
+            next_state = self.get_next_state(state, history, state_sequence[:])
             
             state_sequence.append(next_state)
             event_sequence.append(event)
