@@ -5,12 +5,25 @@ from enum import Enum
 
 class EventType(Enum):
     """事件类型枚举"""
-    COMPLETE_TRANSITION = "complete_transition"
-    PARTIAL_TRANSITION = "partial_transition"
-    PERIODIC_TO_UNHEALTHY = "periodic_to_unhealthy"
-    PERIODIC_TO_HEALTHY = "periodic_to_healthy"
-    STATE_MAINTENANCE = "state_maintenance"
-    NO_EFFECTIVE_TRANSITION = "no_effective_transition"
+    # 通用事件
+    COMPLETE_TRANSITION = "complete_transition"      # 完全转移
+    PARTIAL_TRANSITION = "partial_transition"        # 部分转移
+    NO_EFFECTIVE_TRANSITION = "no_effective_transition"  # 无有效转移
+    STATE_MAINTENANCE = "state_maintenance"          # 状态维持
+    
+    # 周期模型专用
+    PERIODIC_TO_UNHEALTHY = "periodic_to_unhealthy"  # 周期性转向不健康
+    PERIODIC_TO_HEALTHY = "periodic_to_healthy"      # 周期性转向健康
+    
+    # 协同模型专用
+    SYNERGISTIC_TRANSITION = "synergistic_transition"  # 协同转移
+    
+    # 耐受模型专用
+    TOLERANCE_REVERSION = "tolerance_reversion"      # 耐受回退	
+
+	# 依赖模型专用
+    DETERIORATION = "deterioration"  # 恶化事件
+	
 	
 
 class BaseHealthModel(ABC):

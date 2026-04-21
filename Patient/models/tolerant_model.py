@@ -8,14 +8,13 @@
 - 产生耐受后，需要使用干预B (0,1,0) 连续 m 步才能完全转换到稳定健康状态
 
 事件定义：
-- E4a (完全转移): 先连续 n+k 步干预A，再连续 m 步干预B → 健康
-- E4b (耐受回退): 连续 n+k 步干预A（但未接干预B）→ 不健康（耐受）
-- E4c (部分转移): 连续 n 步干预A（但不足 n+k）→ 健康（但不稳定）
-- E4d (无有效转移): 其他情况 → 不健康
+- E4a (完全转移): 先连续 n+k 步干预A，再连续 m 步干预B → 稳定健康 (0,0,0)
+- E4b (耐受回退): 连续 n+k 步干预A（但未接干预B）→ 不健康 (1,0,0)（耐受）
+- E4c (部分转移): 连续 n 步干预A（但不足 n+k）→ 健康 (0,0,0)（但不稳定）
+- E4d (无有效转移): 其他情况 → 不健康 (1,0,0)
 """
 
 from typing import List, Tuple, Optional, Dict, Any
-from enum import Enum
 from .base_model import BaseHealthModel, EventType
 
 
@@ -78,39 +77,6 @@ class TolerantStateTransitionModel(BaseHealthModel):
         """获取可用的干预动作"""
         return [self.INTERVENTION_A, self.INTERVENTION_B, self.NO_INTERVENTION]
     
-    def _update_consecutive_counts(
-        self,
-        intervention_history: List[Tuple]
-    ) -> None:
-        """
-        更新连续干预计数（基于最近的历史）
-        """
-        if not intervention_history:
-            self._consecutive_A_count = 0
-            self._consecutive_B_count = 0
-            return
-        
-        # 检查最近的干预
-        last_intervention = intervention_history[-1]
-        
-        if last_intervention == self.INTERVENTION_A:
-            # 如果上一个也是干预A，增加计数；否则重置
-            if len(intervention_history) >= 2 and intervention_history[-2] == self.INTERVENTION_A:
-                self._consecutive_A_count += 1
-            else:
-                self._consecutive_A_count = 1
-            self._consecutive_B_count = 0
-        elif last_intervention == self.INTERVENTION_B:
-            if len(intervention_history) >= 2 and intervention_history[-2] == self.INTERVENTION_B:
-                self._consecutive_B_count += 1
-            else:
-                self._consecutive_B_count = 1
-            self._consecutive_A_count = 0
-        else:
-            # 无干预，重置所有计数
-            self._consecutive_A_count = 0
-            self._consecutive_B_count = 0
-    
     def check_event(
         self,
         intervention_history: List[Tuple],
@@ -119,7 +85,7 @@ class TolerantStateTransitionModel(BaseHealthModel):
         """
         根据干预历史判断事件类型
         
-        注意：E4a 需要检查是否存在子序列满足条件
+        检查顺序：E4a -> E4b -> E4c -> E4d
         """
         t = len(intervention_history)
         n = self.model_params["n"]
@@ -149,7 +115,7 @@ class TolerantStateTransitionModel(BaseHealthModel):
                 intervention_history[t - n - k + j] == self.INTERVENTION_A
                 for j in range(n + k)
             ):
-                return EventType.PERIODIC_TO_UNHEALTHY  # 复用为耐受回退
+                return EventType.TOLERANCE_REVERSION
         
         # 检查 E4c: 最近 n 次都是干预A，但不足 n+k（部分转移）
         if t >= n:
@@ -157,7 +123,7 @@ class TolerantStateTransitionModel(BaseHealthModel):
                 intervention_history[t - n + j] == self.INTERVENTION_A
                 for j in range(n)
             ):
-                # 确保不是 E4b
+                # 确保不是 E4b（即不足 n+k 次）
                 if t < n + k or not all(
                     intervention_history[t - n - k + j] == self.INTERVENTION_A
                     for j in range(n + k)
@@ -177,12 +143,12 @@ class TolerantStateTransitionModel(BaseHealthModel):
         根据事件类型计算下一个状态
         
         转移规则：
-        - E4a: 完全转移 → 健康 (0,0,0)
-        - E4b: 耐受回退 → 不健康 (1,0,0)
+        - E4a: 完全转移 → 稳定健康 (0,0,0)
+        - E4b: 耐受回退 → 不健康 (1,0,0)（产生耐受）
         - E4c: 部分转移 → 健康 (0,0,0)（但不稳定）
         - E4d: 无有效转移 → 不健康 (1,0,0)
         """
-        event = self.check_event(intervention_history)
+        event = self.check_event(intervention_history, state_history)
         
         if event == EventType.COMPLETE_TRANSITION:
             # E4a: 完全转移，稳定健康
@@ -192,7 +158,7 @@ class TolerantStateTransitionModel(BaseHealthModel):
             self._is_tolerant = False
             return self.HEALTHY
         
-        elif event == EventType.PERIODIC_TO_UNHEALTHY:  # 耐受回退
+        elif event == EventType.TOLERANCE_REVERSION:
             # E4b: 产生耐受，回到不健康
             self._consecutive_A_count = 0
             self._consecutive_B_count = 0
