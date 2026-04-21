@@ -23,8 +23,10 @@ class EventType(Enum):
 
 	# 依赖模型专用
     DETERIORATION = "deterioration"  # 恶化事件
-	
-	
+
+    # 过敏模型专用
+    ADVERSE_REACTION = "adverse_reaction"  # 过敏反应事件
+
 
 class BaseHealthModel(ABC):
     """健康监护生成模型的统一基类"""
