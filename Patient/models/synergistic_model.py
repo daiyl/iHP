@@ -9,7 +9,7 @@
 事件定义：
 - E3a (单一干预转移): 存在连续 n 次单一干预 (0,0,1) → 稳定健康
 - E3b (协同转移): 存在连续 m 次联合干预 (0,1,1) → 稳定健康
-- E3c (无有效转移): 其他情况 → 中间状态 (0.1, 1)（不可观测）
+- E3c (无有效转移): 其他情况 → 中间状态 (0, 1, 1)（不可观测）
 """
 
 from typing import List, Tuple, Optional, Dict, Any
@@ -42,7 +42,7 @@ class SynergisticStateTransitionModel(BaseHealthModel):
         # 可观测状态
         self.UNHEALTHY = (0, 1, 1)    # 不健康状态
         self.HEALTHY = (0, 0, 0)      # 稳定健康状态
-        self.INTERMEDIATE = (0.1, 1)  # 中间状态（不可观测，但根据文档定义）
+        self.INTERMEDIATE = (0, 1, 1)  # 中间状态（不可观测，但根据文档定义）
         
         # 干预定义
         self.SINGLE_INTERVENTION = (0, 0, 1)   # 单一干预
@@ -153,7 +153,7 @@ class SynergisticStateTransitionModel(BaseHealthModel):
         转移规则：
         - E3a: 单一干预转移 → 稳定健康 (0,0,0)
         - E3b: 协同转移 → 稳定健康 (0,0,0)
-        - E3c: 无有效转移 → 中间状态 (0.1, 1)
+        - E3c: 无有效转移 → 中间状态 (0, 1, 1)
         """
         event = self.check_event(intervention_history, state_history)
         
@@ -172,7 +172,7 @@ class SynergisticStateTransitionModel(BaseHealthModel):
             return self.HEALTHY
         
         else:  # NO_EFFECTIVE_TRANSITION
-            # E3c: 无有效转移，进入中间状态 (0.1, 1)
+            # E3c: 无有效转移，进入中间状态 (0, 1, 1)
             self._consecutive_single_count = 0
             self._consecutive_joint_count = 0
             self._is_in_intermediate = True

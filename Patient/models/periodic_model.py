@@ -166,14 +166,14 @@ class PeriodicStateTransitionModel(BaseHealthModel):
         elif event == EventType.PERIODIC_TO_UNHEALTHY:
             # E2b: 周期性转向不健康
             # 重置周期计数器，开始不健康阶段
-            self._period_counter = 1
+            self._period_counter = 0
             self._current_phase = "unhealthy"
             return self.UNHEALTHY
         
         elif event == EventType.PERIODIC_TO_HEALTHY:
             # E2c: 周期性转向健康
             # 重置周期计数器，开始健康阶段
-            self._period_counter = 1
+            self._period_counter = 0
             self._current_phase = "healthy"
             return self.HEALTHY
         
