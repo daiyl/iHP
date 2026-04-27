@@ -22,7 +22,7 @@ The framework follows a three-stage generation pipeline:
 ## Evaluation Benchmark ##
 The benchmark includes 9 state-of-the-art sequence prediction models across 4 categories:
 
-| Category | Models |
+| **Category** | **Models** |
 |:--------:|:------:|
 | **Transformer** | iTransformer, PatchTST |
 | **RNN** | LSTM, xLSTM, Mamba |
