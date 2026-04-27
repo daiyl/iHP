@@ -41,3 +41,14 @@
 7. **Antagonistic State Transition Model**.
 
 
+
+### 📂 iHP/Patient/models/
+- `base_model.py` - 统一接口基类
+- `delayed_model.py` - 延迟状态转移模型
+- `periodic_model.py` - 周期状态转移模型
+- `synergistic_model.py` - 协同状态转移模型
+- `tolerant_model.py` - 耐受状态转移模型
+- `dependency_model.py` - 依赖恶化状态转移模型
+- `allergy_model.py` - 过敏状态转移模型
+- `antagonistic_model.py` - 拮抗状态转移模型
+
