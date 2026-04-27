@@ -20,7 +20,7 @@ The framework follows a three-stage generation pipeline:
 3. **Temporal Interpolation**: Create continuous transitions between pathological states using latent diffusion-based interpolation
 
 ## Evaluation Benchmark ##
-The benchmark includes 9 state-of-the-art sequence prediction models across 4 categories:
+The benchmark includes state-of-the-art sequence prediction models across different categories:
 
 | **Category** | **Models** |
 |:--------:|:------:|
