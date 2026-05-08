@@ -5,7 +5,11 @@
 - **Probability transition model**: $p(s'|s, a)$, where $a \in A$, and $\{s, s'\} \in S$.
 - **Decoder**: $dec(o|s)$, where $o \in O$.
 
-## Models of patients: ##
+## Latent models: ##
+
+- **Input**: Intervention Space, $A$.
+- **Output**: State Space, $S$.
+- **Probability transition model**: $p(s'|s, a)$, where $a \in A$, and $\{s, s'\} \in S$.
 
 1. **Delayed State Transition Model**. Assume the initial latent health state is the unhealthy state $s_0 = (0,0,1)$. When the same intervention $a = (0,0,1)$ is applied continuously for $n$ time steps, the latent health state transitions to the healthy state $(0,0,0)$. However, this represents only a partial state transition. If the intervention is discontinued at this point, the latent health state will revert back to $(0,0,1)$ after maintaining the intermediate state for $k$ time steps. Furthermore, if the intervention is sustained for $m$ time steps, where $m > n$, a complete state transition occurs and the latent health state remains stable at $(0,0,0)$. We define three mutually exclusive events based on the history of interventions up to time $t$:
 
@@ -52,3 +56,16 @@
 - `allergy_model.py` - 过敏状态转移模型
 - `antagonistic_model.py` - 拮抗状态转移模型
 
+## Phenotype decoders: ##
+- **Input**: State Space, $S$.
+- **Output**: Observation Space, $O$.
+- **Decoder**: $dec(o|s)$, where $o \in O$.
+
+
+1. **Chest X-Ray**.
+
+
+2. **Optical Coherence Tomography**.
+
+
+3. **Color Fundus Photography**.
