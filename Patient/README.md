@@ -46,7 +46,7 @@
 
 
 
-### 📂 iHP/Patient/latent_models/
+### 📂 iHP/Patient/models/
 - `base_model.py` - 统一接口基类
 - `delayed_model.py` - 延迟状态转移模型
 - `periodic_model.py` - 周期状态转移模型
