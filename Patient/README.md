@@ -63,9 +63,13 @@
 
 
 1. **Chest X-Ray**.
-![](http://https://github.com/daiyl/iHP/blob/main/Patient/phenotype_decoders/observation_data/generated_observations/pneumonia-100.png)
 
-2. **Optical Coherence Tomography**.![](https://github.com/daiyl/iHP/blob/main/Patient/phenotype_decoders/observation_data/generated_observations/oct-100.png)
+![](https://github.com/daiyl/iHP/blob/main/Patient/phenotype_decoders/observation_data/generated_observations/pneumonia-100.png)
+
+2. **Optical Coherence Tomography**.
+
+![](https://github.com/daiyl/iHP/blob/main/Patient/phenotype_decoders/observation_data/generated_observations/oct-100.png)
 
 3. **Color Fundus Photography**.
+
 ![](https://github.com/daiyl/iHP/blob/main/Patient/phenotype_decoders/observation_data/generated_observations/fundus-100.png)
