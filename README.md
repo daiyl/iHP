@@ -1,54 +1,72 @@
-# iHP: Intelligent Healthcare Process Simulation Framework #
-A simulation framework for generating realistic, mechanism-driven healthcare processes based on Partially Observable Markov Decision Processes (POMDP). This framework enables systematic evaluation of sequence prediction algorithms for disease progression modeling and clinical decision support.
+# Patient
+
+- **Input**: Intervention Space, $A$.
+- **Output**: State Space, $S$; Observation Space, $O$.
+- **Probability transition model**: $p(s'|s, a)$, where $a \in A$, and $\{s, s'\} \in S$.
+- **Decoder**: $dec(o|s)$, where $o \in O$.
+
+## Latent models: ##
+
+- **Input**: Intervention Space, $A$.
+- **Output**: State Space, $S$.
+- **Probability transition model**: $p(s'|s, a)$, where $a \in A$, and $\{s, s'\} \in S$.
+
+1. **Delayed State Transition Model**. Assume the initial latent health state is the unhealthy state $s_0 = (0,0,1)$. When the same intervention $a = (0,0,1)$ is applied continuously for $n$ time steps, the latent health state transitions to the healthy state $(0,0,0)$. However, this represents only a partial state transition. If the intervention is discontinued at this point, the latent health state will revert back to $(0,0,1)$ after maintaining the intermediate state for $k$ time steps. Furthermore, if the intervention is sustained for $m$ time steps, where $m > n$, a complete state transition occurs and the latent health state remains stable at $(0,0,0)$. We define three mutually exclusive events based on the history of interventions up to time $t$:
+
+	Event $E_{1a}$ (Complete Transition). $\exists i \in [0, t-m+1]$ such that $a_i = a_{i+1} = ... = a_{i+m-1} = (0, 0, 1)$.
+
+	Event $E_{1b}$ (Partial Transition). $E_{1a}$ does not occur, and $\exists j \in [0, k-1]$ such that $a_{t-n-j+1} = ... = a_{t-j} = (0, 0, 1)$.
+	
+	Event $E_{1c}$ (No Effective Transition). None of the above events occur ($\lnot E_{1a}  \land \lnot E_{1b}$).
+	
+	The state transition probabilities can be represented as:
+	
+	$$p_1(s_{t+1}=(0,0,0)|E_{1a}) = 1, $$
+	
+	$$p_1(s_{t+1}=(0,0,0)|E_{1b}) = 1, $$
+	
+	$$p_1(s_{t+1}=(0,0,1)|E_{1c}) = 1. $$
+
+2. **Periodic State Transition Model**. 
 
 
-## Overview ##
-iHP provides a standardized, reproducible, and extensible foundation for evaluating intelligent healthcare algorithms. It addresses the critical challenge of data scarcity in healthcare by generating high-quality synthetic multimodal data that respects underlying physiological mechanisms.
-
-Key Features:
-- Mechanism-driven simulation of patient health state dynamics
-- Interpretable state transition models
-- Shared latent state encoding for naturally aligned multimodal data
-- Standardized benchmark for sequence prediction algorithms
-
-## Generation Pipeline ##
-The framework follows a three-stage generation pipeline:
+3. **Synergistic State Transition Model**.
 
 
-1. **Latent State Generation**: Generate intervention-state sequences using predefined transition models
-2. **Multimodal Synthesis**: Map latent states to high-fidelity images (chest X-ray, fundus photography, OCT) via conditional diffusion models
-3. **Temporal Interpolation**: Create continuous transitions between pathological states using latent diffusion-based interpolation
-
-## Evaluation Benchmark ##
-The benchmark includes state-of-the-art sequence prediction models across different categories:
-
-| **Category** | **Models** |
-|:--------:|:------:|
-| **Transformer** | iTransformer, PatchTST |
-| **RNN** | LSTM, xLSTM, Mamba |
-| **CNN** | SCINet, TimesNet |
-| **MLP** | DLinear, TiDE |
+4. **Tolerant State Transition Model**.
 
 
-## Quick Start ##
-
-    # python
-
-    from Patient.models.delayed_model import DelayedStateTransitionModel
-    
-    # Initialize model with parameters
-    model = DelayedStateTransitionModel(n=2, m=4, k=2)
-    
-    # Define intervention sequence
-    interventions = [
-	    (0, 0, 1),  # apply intervention
-	    (0, 0, 1),  # continue intervention
-	    (0, 0, 0),  # stop intervention
-    ]
-    
-    # Simulate health state evolution
-    result = model.simulate(interventions, return_details=True)
-    print(f"Health states: {result['states']}")
-    print(f"Events: {result['events']}")
+5. **Dependency-Induced Deterioration State Transition Model**.
 
 
+6. **Allergy State Transition Model**.
+
+
+7. **Antagonistic State Transition Model**.
+
+
+
+### 📂 iHP/Patient/models/
+- `base_model.py` - 统一接口基类
+- `delayed_model.py` - 延迟状态转移模型
+- `periodic_model.py` - 周期状态转移模型
+- `synergistic_model.py` - 协同状态转移模型
+- `tolerant_model.py` - 耐受状态转移模型
+- `dependency_model.py` - 依赖恶化状态转移模型
+- `allergy_model.py` - 过敏状态转移模型
+- `antagonistic_model.py` - 拮抗状态转移模型
+
+## Phenotype decoders: ##
+- **Input**: State Space, $S$.
+- **Output**: Observation Space, $O$.
+- **Decoder**: $dec(o|s)$, where $o \in O$.
+
+
+1. **Chest X-Ray**.
+![](http://https://github.com/daiyl/iHP/blob/main/Patient/phenotype_decoders/observation_data/generated_observations/pneumonia-100.png)
+
+2. **Optical Coherence Tomography**.
+![](https://github.com/daiyl/iHP/blob/main/Patient/phenotype_decoders/observation_data/generated_observations/oct-100.png)
+
+3. **Color Fundus Photography**.
+![](https://github.com/daiyl/iHP/blob/main/Patient/phenotype_decoders/observation_data/generated_observations/fundus-100.png)
