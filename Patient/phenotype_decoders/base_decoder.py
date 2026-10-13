@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Tuple, Type
+from typing import Iterable, List, Optional, Tuple, Type
 
 import numpy as np
 import torch
@@ -10,21 +10,18 @@ from torch.utils.data import DataLoader, Dataset
 
 
 State = Tuple[float, float, float]
+StateImageFile = Tuple[State, str]
 
-STATE_IMAGE_FILES = [
+THREE_STATE_IMAGE_FILES: Tuple[StateImageFile, ...] = (
     ((1.0, 0.0, 0.0), "(1,0,0).png"),
-    ((0.9, 0.1, 0.0), "(0.9,0.1,0).png"),
-    ((0.8, 0.2, 0.0), "(0.8,0.2,0).png"),
     ((0.0, 1.0, 0.0), "(0,1,0).png"),
-    ((0.1, 0.9, 0.0), "(0.1,0.9,0).png"),
-    ((0.0, 0.9, 0.1), "(0,0.9,0.1).png"),
-    ((0.2, 0.8, 0.0), "(0.2,0.8,0).png"),
-    ((0.1, 0.8, 0.1), "(0.1,0.8,0.1).png"),
-    ((0.0, 0.8, 0.2), "(0,0.8,0.2).png"),
     ((0.0, 0.0, 1.0), "(0,0,1).png"),
-    ((0.0, 0.1, 0.9), "(0,0.1,0.9).png"),
-    ((0.0, 0.2, 0.8), "(0,0.2,0.8).png"),
-]
+)
+
+DEFAULT_STATE_IMAGE_FILES = THREE_STATE_IMAGE_FILES
+
+# Backward-compatible aliases for code that imports the old names directly.
+STATE_IMAGE_FILES = DEFAULT_STATE_IMAGE_FILES
 
 TRAINING_STATES = np.array([state for state, _ in STATE_IMAGE_FILES], dtype=np.float32)
 
@@ -51,17 +48,31 @@ def state_label(state: Iterable[float]) -> str:
     return "_".join(f"{x:g}" for x in normalize_state(state))
 
 
-def nearest_training_state(state: Iterable[float]) -> np.ndarray:
+def training_states_from_image_files(state_image_files: Tuple[StateImageFile, ...]) -> np.ndarray:
+    return np.array([state for state, _ in state_image_files], dtype=np.float32)
+
+
+def nearest_training_state(
+    state: Iterable[float],
+    training_states: Optional[np.ndarray] = None,
+) -> np.ndarray:
     normalized = normalize_state(state)
-    distances = np.linalg.norm(TRAINING_STATES - normalized, axis=1)
-    return TRAINING_STATES[int(np.argmin(distances))].copy()
+    states = TRAINING_STATES if training_states is None else np.asarray(training_states, dtype=np.float32)
+    distances = np.linalg.norm(states - normalized, axis=1)
+    return states[int(np.argmin(distances))].copy()
 
 
 class StateImageDataset(Dataset):
-    def __init__(self, image_dir: Path, image_size: int = 64):
+    def __init__(
+        self,
+        image_dir: Path,
+        state_image_files: Tuple[StateImageFile, ...] = DEFAULT_STATE_IMAGE_FILES,
+        image_size: int = 64,
+    ):
         self.samples = []
         self.image_size = image_size
-        for state, filename in STATE_IMAGE_FILES:
+        self.training_states = training_states_from_image_files(state_image_files)
+        for state, filename in state_image_files:
             image_path = image_dir / filename
             if not image_path.exists():
                 raise FileNotFoundError(f"Missing training image: {image_path}")
@@ -109,12 +120,18 @@ class DecoderSpec:
     image_dir: Path
     checkpoint_name: str
     decoder_class: Type[StateImageDecoder] = StateImageDecoder
+    state_image_files: Tuple[StateImageFile, ...] = DEFAULT_STATE_IMAGE_FILES
+    force_discrete_decode: bool = False
 
 
-def prepare_decoder_state(state: Iterable[float], round_to_training_state: bool = True) -> np.ndarray:
+def prepare_decoder_state(
+    state: Iterable[float],
+    round_to_training_state: bool = True,
+    training_states: Optional[np.ndarray] = None,
+) -> np.ndarray:
     normalized = normalize_state(state)
     if round_to_training_state:
-        return nearest_training_state(normalized)
+        return nearest_training_state(normalized, training_states=training_states)
     return normalized
 
 
@@ -125,10 +142,18 @@ def image_from_tensor(output: torch.Tensor) -> Image.Image:
 
 
 def load_decoder(spec, checkpoint_dir: Path, device: torch.device) -> StateImageDecoder:
-    checkpoint_path = checkpoint_dir / spec
+    checkpoint_name = spec.checkpoint_name if isinstance(spec, DecoderSpec) else spec
+    checkpoint_path = checkpoint_dir / checkpoint_name
     checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
-    decoder = StateImageDecoder().to(device)
+    decoder_class = spec.decoder_class if isinstance(spec, DecoderSpec) else StateImageDecoder
+    decoder = decoder_class().to(device)
     decoder.load_state_dict(checkpoint["model_state_dict"])
+    if isinstance(spec, DecoderSpec):
+        decoder.training_states = training_states_from_image_files(spec.state_image_files)
+        decoder.force_discrete_decode = spec.force_discrete_decode
+    else:
+        decoder.training_states = np.asarray(checkpoint.get("training_states", TRAINING_STATES), dtype=np.float32)
+        decoder.force_discrete_decode = False
     decoder.eval()
     return decoder
 
@@ -139,7 +164,12 @@ def decode_state(
     device: torch.device,
     round_to_training_state: bool = True,
 ) -> Image.Image:
-    prepared_state = prepare_decoder_state(state, round_to_training_state=round_to_training_state)
+    should_round = bool(getattr(decoder, "force_discrete_decode", False)) or round_to_training_state
+    prepared_state = prepare_decoder_state(
+        state,
+        round_to_training_state=should_round,
+        training_states=getattr(decoder, "training_states", None),
+    )
     state_tensor = torch.tensor(prepared_state, dtype=torch.float32, device=device).unsqueeze(0)
     with torch.no_grad():
         output = decoder(state_tensor)
@@ -152,7 +182,16 @@ def decode_states(
     device: torch.device,
     round_to_training_state: bool = True,
 ) -> List[Image.Image]:
-    prepared_states = [prepare_decoder_state(state, round_to_training_state=round_to_training_state) for state in states]
+    should_round = bool(getattr(decoder, "force_discrete_decode", False)) or round_to_training_state
+    training_states = getattr(decoder, "training_states", None)
+    prepared_states = [
+        prepare_decoder_state(
+            state,
+            round_to_training_state=should_round,
+            training_states=training_states,
+        )
+        for state in states
+    ]
     keys = [tuple(np.round(state, 6)) for state in prepared_states]
     unique_states = {}
     for key, state in zip(keys, prepared_states):
@@ -175,7 +214,7 @@ def train_decoder(
     image_size: int,
     device: torch.device,
 ) -> Path:
-    dataset = StateImageDataset(spec.image_dir, image_size=image_size)
+    dataset = StateImageDataset(spec.image_dir, state_image_files=spec.state_image_files, image_size=image_size)
     loader = DataLoader(dataset, batch_size=min(batch_size, len(dataset)), shuffle=True)
     decoder = spec.decoder_class().to(device)
     optimizer = torch.optim.Adam(decoder.parameters(), lr=learning_rate)
@@ -204,7 +243,7 @@ def train_decoder(
             "image_size": image_size,
             "model_state_dict": decoder.state_dict(),
             "architecture": "StateImageDecoder(state_dim=3, latent_dim=128, base_channels=64)",
-            "training_states": TRAINING_STATES,
+            "training_states": dataset.training_states,
         },
         checkpoint_path,
     )

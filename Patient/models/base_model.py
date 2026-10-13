@@ -17,9 +17,10 @@ class EventType(Enum):
     
     # 协同模型专用
     SYNERGISTIC_TRANSITION = "synergistic_transition"  # 协同转移
-    
+
     # 耐受模型专用
     TOLERANCE_REVERSION = "tolerance_reversion"      # 耐受回退	
+    TOLERANCE_INDUCTION = "tolerance_induction"      # 诱导耐受
 
 	# 依赖模型专用
     DETERIORATION = "deterioration"  # 恶化事件
@@ -64,7 +65,7 @@ class BaseHealthModel(ABC):
         state_history: Optional[List[Tuple]] = None
     ) -> Tuple:
         pass
-    
+
     def simulate(
         self,
         intervention_sequence: List[Tuple],

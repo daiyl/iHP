@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from .base_decoder import DecoderSpec, StateImageDecoder
+from .base_decoder import DecoderSpec, StateImageDecoder, THREE_STATE_IMAGE_FILES
 
 
 class OCTDecoder(StateImageDecoder):
@@ -9,9 +9,11 @@ class OCTDecoder(StateImageDecoder):
 
 SPEC = DecoderSpec(
     name="oct",
-    image_dir=Path("Patient/decoders/training_data/oct"),
+    image_dir=Path("Patient/models/training_data/oct"),
     checkpoint_name="oct_decoder.pt",
     decoder_class=OCTDecoder,
+    state_image_files=THREE_STATE_IMAGE_FILES,
+    force_discrete_decode=True,
 )
 
 
