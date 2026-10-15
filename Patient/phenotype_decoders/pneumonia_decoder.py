@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from .base_decoder import DecoderSpec, StateImageDecoder
+from .base_decoder import DecoderSpec, StateImageDecoder, THREE_STATE_IMAGE_FILES
 
 
 class PneumoniaDecoder(StateImageDecoder):
@@ -9,9 +9,11 @@ class PneumoniaDecoder(StateImageDecoder):
 
 SPEC = DecoderSpec(
     name="pneumonia",
-    image_dir=Path("Patient/decoders/training_data/pneumonia"),
+    image_dir=Path("Patient/models/training_data/pneumonia"),
     checkpoint_name="pneumonia_decoder.pt",
     decoder_class=PneumoniaDecoder,
+    state_image_files=THREE_STATE_IMAGE_FILES,
+    force_discrete_decode=True,
 )
 
 

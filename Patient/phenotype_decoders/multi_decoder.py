@@ -1,24 +1,46 @@
-import torch
 from pathlib import Path
+from typing import Dict, Tuple
 
-from phenotype_decoders.base_decoder import decode_state, load_decoder, parse_state, state_label
+import torch
+
+from Patient.phenotype_decoders import DECODER_SPECS
+from Patient.phenotype_decoders.base_decoder import decode_state, load_decoder
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-checkpoint_dir = Path("phenotype_decoders/checkpoints")
-output_dir = Path("phenotype_decoders/observation_data/generated_observations")
-output_dir.mkdir(parents=True, exist_ok=True)
+DEFAULT_CHECKPOINT_DIR = Path(__file__).resolve().parent / "checkpoints"
+_DECODER_CACHE: Dict[Tuple[str, Path, str], object] = {}
 
-def multi_decoder(state):
-	decoders = {"pneumonia":"pneumonia_decoder.pt", "fundus":"fundus_decoder.pt", "oct":"oct_decoder.pt"}
-	images = []
-	for name, dec in decoders.items():
-		decoder = load_decoder(dec, checkpoint_dir, device)
-		image = decode_state(decoder, state, device, round_to_training_state=False)
-		images.append(image)
-		# plt.figure()
-		# plt.imshow(image)
-		# output_path = output_dir / f"{name}-{sn}.png"
-		# image.save(output_path)
-		# print(f"Saved {output_path}")
-		
-	return images
+
+def _selected_specs(modalities=None):
+    if isinstance(modalities, str):
+        modalities = [modalities]
+    if modalities is None or "all" in modalities:
+        return DECODER_SPECS
+    selected = {}
+    for name in modalities:
+        if name not in DECODER_SPECS:
+            raise ValueError(f"Unknown decoder {name}; choose from {sorted(DECODER_SPECS)} or all")
+        selected[name] = DECODER_SPECS[name]
+    return selected
+
+
+def _get_decoder(name, spec, checkpoint_dir):
+    key = (name, checkpoint_dir.resolve(), str(device))
+    if key not in _DECODER_CACHE:
+        _DECODER_CACHE[key] = load_decoder(spec, checkpoint_dir, device)
+    return _DECODER_CACHE[key]
+
+
+def multi_decoder(state, return_state=False, modalities=None, checkpoint_dir=None):
+    decoder_state = tuple(float(x) for x in state)
+    active_checkpoint_dir = DEFAULT_CHECKPOINT_DIR if checkpoint_dir is None else Path(checkpoint_dir)
+    images = []
+    for name, spec in _selected_specs(modalities).items():
+        decoder = _get_decoder(name, spec, active_checkpoint_dir)
+        image = decode_state(decoder, decoder_state, device, round_to_training_state=True)
+        images.append(image)
+
+    if return_state:
+        return images, decoder_state
+    return images
