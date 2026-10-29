@@ -1,0 +1,10 @@
+# Curated direct requirements; no environment has been modified.
+# A historical, fully validated version lock was not found in the source.
+numpy
+pandas
+scikit-learn
+scipy
+torch
+matplotlib
+tqdm
+Pillow
