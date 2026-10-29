@@ -1,0 +1,62 @@
+{
+  "status": "execution_template_not_verified_paper_configuration",
+  "models": [
+    "LSTM",
+    "xLSTM",
+    "Mamba",
+    "iTransformer",
+    "PatchTST",
+    "DLinear",
+    "TiDE",
+    "SCINet",
+    "TimesNet"
+  ],
+  "windows": [
+    [
+      15,
+      1
+    ],
+    [
+      24,
+      3
+    ],
+    [
+      24,
+      6
+    ],
+    [
+      24,
+      12
+    ]
+  ],
+  "datasets": {
+    "delayed_response": {
+      "name": "Delayed Response",
+      "target": "obs"
+    },
+    "periodicity": {
+      "name": "Periodicity",
+      "target": "obs"
+    },
+    "synergistic_effect": {
+      "name": "Synergistic Effect",
+      "target": "obs"
+    },
+    "tolerance": {
+      "name": "Tolerance",
+      "target": "obs"
+    },
+    "dependency_induced_deterioration": {
+      "name": "Dependency-Induced Deterioration",
+      "target": "obs"
+    },
+    "allergic_response": {
+      "name": "Allergic Response",
+      "target": "obs"
+    },
+    "antagonistic_effect": {
+      "name": "Antagonistic Effect",
+      "target": "obs"
+    }
+  }
+}

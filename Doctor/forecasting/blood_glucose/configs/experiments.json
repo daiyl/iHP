@@ -1,0 +1,38 @@
+{
+  "status": "execution_template_not_verified_paper_configuration",
+  "models": [
+    "LSTM",
+    "xLSTM",
+    "Mamba",
+    "iTransformer",
+    "PatchTST",
+    "DLinear",
+    "TiDE",
+    "SCINet",
+    "TimesNet"
+  ],
+  "windows": [
+    [
+      15,
+      1
+    ],
+    [
+      24,
+      3
+    ],
+    [
+      24,
+      6
+    ],
+    [
+      24,
+      12
+    ]
+  ],
+  "datasets": {
+    "blood_glucose": {
+      "name": "Blood glucose",
+      "target": "glucose"
+    }
+  }
+}

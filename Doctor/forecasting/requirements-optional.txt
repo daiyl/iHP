@@ -1,0 +1,3 @@
+# Install separately in a compatible environment only when selecting these models.
+xlstm
+mamba-ssm
